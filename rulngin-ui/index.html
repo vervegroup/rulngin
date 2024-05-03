@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RulNgin</title>
+  <link rel="stylesheet" href="./src/index.scss"/>
+  <script type="module" src="./src/main.ts"></script>
+  <base href="/">
+</head>
+
+<body>
+
+<main>
+  <section class="container has-background-info-light mb-6">
+    <bq-navigation></bq-navigation>
+  </section>
+
+  <section class="container is-fullheight">
+    <div class="is-fullwidth is-fullheight">
+      <div id="main-application-view" class="container is-fullwidth"></div>
+    </div>
+  </section>
+
+  <footer class="container footer has-background-info-light mt-6">
+    <div class="level-item">
+      <div class="content has-text-centered">
+        <p>
+          Made with love <span>by</span> <a href="https://techeule.com">TechEule.com</a>
+          -
+          <bq-app-version></bq-app-version>
+        </p>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

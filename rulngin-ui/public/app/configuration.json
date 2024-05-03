@@ -1,0 +1,15 @@
+{
+  "oidc": {
+    "clientId": "rulngin-ui",
+    "issuer": "http://t12s-oidc-keycloak:28084/realms/rulngin",
+    "redirectUri": "http://localhost:5173",
+    "scopes": [
+      "openid",
+      "profile",
+      "email"
+    ]
+  },
+  "backend": {
+    "baseUri": "http://localhost:61080/api"
+  }
+}

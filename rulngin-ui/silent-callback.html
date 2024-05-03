@@ -1,0 +1,7 @@
+<script type="module" src="./src/main.ts"></script>
+<script>
+  var mgr = new oidc.UserManager({ response_mode: 'query' });
+  mgr.signinSilentCallback().catch(error => {
+    console.error(error);
+  });
+</script>

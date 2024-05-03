@@ -1,0 +1,105 @@
+services:
+  rulngin-backend:
+    container_name: rulngin-backend
+    restart: on-failure
+    build:
+      context: ../../rulngin-backend
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    environment:
+      QUARKUS_PROFILE: 'dev,docker-compose'
+      T12S_OIDC_ROOT: "http://t12s-oidc-keycloak:28084/realms/rulngin"
+      # QUARKUS_LOG_LEVEL: ALL
+    ports:
+      - "51080:51080"
+    networks:
+      rulngin-network:
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:51080/q/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  t12s-db-postgres:
+    container_name: rulngin-sql-database
+    restart: on-failure
+    image: postgres:15-bookworm
+    environment:
+      POSTGRES_USER: bytesandcodes
+      POSTGRES_PASSWORD: bytesandcodes-password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - "./rulngin-sql-database:/docker-entrypoint-initdb.d"
+      - "rulngin-database-postgres:/var/lib/postgresql/data"
+    ports:
+      - "25432:5432"
+    networks:
+      rulngin-network:
+    healthcheck:
+      test: [ "CMD-SHELL", "psql '--user=bytesandcodes' '--dbname=oidc_keycloak' '--command=select 1'" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  t12s-oidc-keycloak:
+    container_name: t12s-oidc-keycloak
+    restart: on-failure
+    image: quay.io/keycloak/keycloak:24.0.3
+    command:
+      - --config-file=/opt/oidc/keycloak.conf
+      - start-dev
+      - --db=postgres
+    environment:
+      KEYCLOAK_ADMIN: hst-admin-user
+      KEYCLOAK_ADMIN_PASSWORD: hst-admin-password
+      TZ: Etc/UTC
+    volumes:
+      - "./keycloak/keycloak.conf:/opt/oidc/keycloak.conf"
+    ports:
+      - "28084:28084"
+    networks:
+      rulngin-network:
+    depends_on:
+      - t12s-db-postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:28084/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  t12s-rulngin-dynamodb:
+    container_name: t12s-rulngin-dynamodb
+    build:
+      context: ./dynamodb
+      dockerfile: Dockerfile
+    command: "-jar DynamoDBLocal.jar -port 28091 -sharedDb -dbPath /home/dynamodblocal/data"
+    working_dir: "/home/dynamodblocal"
+    user: "dynamodblocal:dynamodblocal"
+    volumes:
+      - "t12s-rulngin-dynamodb:/home/dynamodblocal/data"
+    restart: always
+    ports:
+      - "28091:28091"
+    networks:
+      rulngin-network:
+
+  t12s-rulngin-db-init:
+    container_name: t12s-rulngin-init
+    build:
+      context: ./db-initializer
+      dockerfile: Dockerfile
+    restart: on-failure
+    environment:
+      DYNAMODB_ENDPOINT: "http://t12s-rulngin-dynamodb:28091"
+      AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
+      AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
+    depends_on:
+      - t12s-rulngin-dynamodb
+    networks:
+      rulngin-network:
+
+networks:
+  rulngin-network:
+
+volumes:
+  rulngin-database-postgres:
+  t12s-rulngin-dynamodb:

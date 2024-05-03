@@ -1,0 +1,13 @@
+
+.dragging-target {
+  opacity: .5;
+  border: rgba(0, 100, 0, 0.62) dashed 2px;
+  color: rgba(0, 100, 0, 100);
+}
+
+@import "bulma/bulma.sass";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/*********/
+@import "styles/rn-policy-metadata-editor.scss";
+/*********/
